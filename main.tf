@@ -19,31 +19,11 @@ resource "aws_ec2_managed_prefix_list" "test" {
     max_entries = 5 
 }
 
+
 resource "aws_ec2_managed_prefix_list_entry" "test" {
     prefix_list_id = aws_ec2_managed_prefix_list.test.id
-    for_each = toset(var.entries)
-    cidr = each.key
+    for_each = var.entries
+    cidr = each.value
+    description = each.key
 }
 
-resource "aws_security_group" "webports" {
-    name = "webaccess2"
-    description = "Allow traffic on port 4000/tcp"
-    vpc_id = var.webvpc
-    ingress {
-        description = "port 4000 ingress"
-        from_port   = 4000
-        to_port     = 4000
-        protocol    = "tcp"
-        cidr_blocks = ["0.0.0.0/0"]
-    }
-    egress {
-        description = "deadend"
-        from_port   = 0
-        to_port     = 0
-        protocol    = "-1"
-        cidr_blocks = ["127.0.0.1/32"]
-    }
-    tags = {
-        Name = "webaccess"
-    }
-}
